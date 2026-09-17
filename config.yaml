@@ -1,0 +1,124 @@
+# config.yaml — AMIS hazard visualization
+#
+# Weights below are a STARTING POINT, not a finding. Adjust them and be ready
+# to defend the choices. The rationale is the point of the project.
+
+region:
+  # Filter by the ministry's own district rather than a hand-drawn box.
+  # Run the AMIS_DISTRICT value_counts first and put the exact string here.
+  district: "COBALT"          # <-- confirm against actual values
+  # Optional fallback if district filtering is too broad/narrow.
+  # Bounding box in EPSG:4326, [xmin, ymin, xmax, ymax].
+  bbox_wgs84: [-79.80, 47.30, -79.58, 47.48]
+
+crs:
+  source_epsg: 4326           # AMIS points
+  target_epsg: 3162           # PDEM: NAD83(CSRS) / Ontario MNR Lambert
+
+terrain:
+  raster_px: 2048
+  scene_extent: 20.0
+  vertical_exaggeration: 10.0
+
+# ---------------------------------------------------------------------------
+# SEVERITY — how bad is this thing if you walk into it
+# ---------------------------------------------------------------------------
+
+severity:
+  # Base weight by feature type. Vertical openings you can fall down are the
+  # top of the scale; surface disturbances are the bottom. 68 distinct types
+  # exist — list the ones in your district and let the rest fall to default.
+  feature_type_weights:
+    "SHAFT - 1 COMPARTMENT - VERTICAL SHAFT": 1.0
+    "SHAFT - 2 COMPARTMENT - VERTICAL SHAFT": 1.0
+    "EXPLORATION SHAFT - VERTICAL SHAFT": 0.95
+    "RAISE TO SURFACE": 0.9
+    "STOPE TO SURFACE": 0.9
+    "ADIT": 0.6
+    "OPEN PIT": 0.55
+    "OPEN CUT": 0.5
+    "QUARRY": 0.45
+    "TRENCH": 0.3
+    "WASTE ROCK DUMP": 0.25
+    "TAILINGS DAMS": 0.4
+    "LATERAL WORKINGS": 0.5
+    "MISCELLANEOUS STRUCTURES": 0.2
+    "MILL, MILL FOUNDATION": 0.2
+  feature_type_default: 0.35
+
+  # Class multiplier. FEATURE TO SURFACE means open to the surface — the ones
+  # a person or animal can actually reach.
+  feature_class_multipliers:
+    "FEATURE TO SURFACE": 1.0
+    "UNDERGROUND": 0.5
+    "WASTES": 0.6
+    "STRUCTURE": 0.4
+    "WELL (OIL, GAS, SALT)": 0.7
+    "NOT AVAILABLE": 0.7        # unknown is not the same as safe
+    "RESIDENTS": 0.3
+
+  # Depth contribution. Treat 0.0 as missing, not as a real measurement —
+  # 3,967 records carry a literal zero and a zero-depth shaft is not a thing.
+  depth:
+    treat_zero_as_missing: true
+    cap_m: 50.0                 # above this, deeper doesn't change the triage
+    weight: 0.4                 # share of severity driven by depth
+    missing_depth_assumption: 0.5   # midpoint, NOT zero — see confidence below
+
+  # Hazard status multiplier.
+  hazard_status_multipliers:
+    "ACTIVE": 1.0
+    "NOT AVAILABLE": 0.8        # unassessed, treated as near-active
+    "NOT A HAZARD": 0.05
+    "REHABILITATED": 0.1
+    "NATURALLY REHABILITATED": 0.2
+
+# ---------------------------------------------------------------------------
+# CONFIDENCE — how much do we actually know about this record
+# ---------------------------------------------------------------------------
+# This is the second axis and the reason the project is interesting. A feature
+# with unknown status, no depth, and a 1993 survey note is not low priority.
+# It is unmeasured. Scoring it low would be the exact failure this map exists
+# to show.
+
+confidence:
+  components:
+    has_hazard_status: 0.35     # FEATURE_HAZARD_STATUS != "NOT AVAILABLE"
+    has_depth: 0.30             # non-null and non-zero
+    has_dimensions: 0.15        # width and length present
+    has_condition_note: 0.20    # MINE_FEATURE_CONDITION non-null
+
+  # Age decay on DATE_LAST_MODIFIED_IN_AMIS. Records last touched in 2006 are
+  # not equivalent to records touched in 2022.
+  recency:
+    enabled: true
+    full_confidence_before_years: 5
+    zero_confidence_after_years: 25
+
+# ---------------------------------------------------------------------------
+# RENDER MAPPING
+# ---------------------------------------------------------------------------
+
+render:
+  marker_height_from: severity
+  marker_color_from: confidence
+  # Low confidence should read as visually distinct, not as "small/unimportant".
+  low_confidence_color: "#E8B33A"
+  high_confidence_color: "#C4443A"
+  min_marker_scale: 0.4
+  max_marker_scale: 2.0
+
+# ---------------------------------------------------------------------------
+# DATA QUALITY FILTERS
+# ---------------------------------------------------------------------------
+
+filters:
+  # Excel serial-date epoch leaking through as real dates. 352 + 52 records on
+  # the sites layer alone. Drop these before any date-based analysis.
+  null_date_sentinels:
+    - "1899-12-29"
+    - "1899-12-30"
+    - "1900-01-01"
+  # Keep everything else. Do not silently drop unassessed features — they are
+  # the finding.
+  drop_not_a_hazard: false

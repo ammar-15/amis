@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Generated and manually supplied project data
+data/raw/
+data/interim/
+data/processed/
+renders copy/
+notes/
+AGENTS.md
+PRD.md

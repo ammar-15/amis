@@ -1,0 +1,6 @@
+geopandas
+rasterio
+fiona
+numpy
+PyYAML
+Pillow
