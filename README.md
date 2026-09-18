@@ -89,6 +89,22 @@ blender --background --python scripts/02_build_scene.py
 
 The render step reads the three contract files and writes still images into `renders/`.
 
+## Explore the dashboard
+
+The optional static frontend presents the processed Cobalt study-window records,
+linked charts, a relative-position plot, and the generated renders. It does not
+load raw data or expose a live hazard service.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+`npm run build` first synchronizes the current generated contract files and
+rendered images into the frontend's ignored public asset directory, then creates
+a deployable static build in `frontend/dist/`.
+
 ## Data rules and constraints
 
 - Raw data in `data/raw/` is read-only.

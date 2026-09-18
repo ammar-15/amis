@@ -11,3 +11,9 @@ renders copy/
 notes/
 AGENTS.md
 PRD.md
+
+# Frontend build outputs and copied visualization assets
+frontend/node_modules/
+frontend/dist/
+frontend/public/data/
+frontend/public/renders/
