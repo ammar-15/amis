@@ -101,9 +101,10 @@ npm install
 npm run dev
 ```
 
-`npm run build` first synchronizes the current generated contract files and
-rendered images into the frontend's ignored public asset directory, then creates
-a deployable static build in `frontend/dist/`.
+`npm run build` creates a deployable static build in `frontend/dist/`. The
+checked-in public assets let static hosts build the dashboard without access to
+local GIS outputs. Run `npm run sync-assets` explicitly after regenerating Phase
+1 data or renders, then commit the refreshed `frontend/public/` assets.
 
 ## Data rules and constraints
 

@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "sync-assets": "node scripts/sync-assets.mjs",
-    "dev": "npm run sync-assets && vite",
-    "build": "npm run sync-assets && tsc -b && vite build",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
