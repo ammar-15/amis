@@ -21,8 +21,6 @@ The repository is organized around a two-stage workflow:
 
 ## Repository structure
 
-- `PRD.md` — product requirements and project rules
-- `AGENTS.md` — operational pointer for the repo
 - `config.yaml` — region, CRS, terrain, scoring, and filter configuration
 - `requirements.txt` — GIS environment dependencies
 - `scripts/00_inspect.py` — schema and CRS audit for raw GIS data
@@ -44,7 +42,6 @@ This project intentionally uses two separate Python environments:
 Use the repo virtual environment at `.venv`.
 
 ```bash
-cd /Users/akuul15/repos/amis
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
@@ -117,5 +114,3 @@ local GIS outputs. Run `npm run sync-assets` explicitly after regenerating Phase
 ## Notes
 
 This project is designed as a portfolio-quality geospatial visualization. The main concern is that the terrain surface and markers align correctly in scene space, not simply that the output looks visually impressive.
-
-For more detail on the intended behavior, scoring rationale, and data conventions, see [PRD.md](PRD.md).
